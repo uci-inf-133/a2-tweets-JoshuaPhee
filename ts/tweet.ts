@@ -20,7 +20,7 @@ class Tweet {
             return "completed_event";
         }
         else{
-            return "miscellaneous"
+            return "miscellaneous";
         }
     }
 
@@ -30,7 +30,10 @@ class Tweet {
         if (this.text.length == 0 || this.text == "") {
             return false;
         } 
-        return true;
+        else if (this.text.includes("-")) {
+            return true;
+        }
+        return false;
     }
 
     get writtenText():string {
@@ -38,6 +41,8 @@ class Tweet {
             return "";
         }
         //TODO: parse the written text from the tweet
+        
+
         return "";
     }
 
