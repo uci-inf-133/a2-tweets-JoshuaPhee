@@ -51,6 +51,10 @@ class Tweet {
             return "unknown";
         }
         //TODO: parse the activity type from the text of the tweet
+
+        // note for next time - use regex to find "mi" or "km" and look at the word that follows it. Return that string
+        // note for next step - in 
+
         return "";
     }
 
