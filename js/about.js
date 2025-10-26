@@ -16,30 +16,65 @@ function parseTweets(runkeeper_tweets) {
 	document.getElementById('numberTweets').innerText = tweet_array.length;	// note this works as a guide for how to use DOM for other '???'
 	// use getSource() and replace 
 
+
+
 	var numCompleted = getCompletedEvents(tweet_array);
 	var allCompletedQuery = document.querySelectorAll('.completedEvents');
 	allCompletedQuery.forEach(element => {
 		element.innerText = numCompleted;
 	});
 
-
-	document.querySelector('.completedEventsPct').innerText = (numCompleted/tweet_array.length).toFixed(2) + "%";
+	document.querySelector('.completedEventsPct').innerText = (numCompleted/tweet_array.length*100).toFixed(2) + "%";
 
 	var numLive = getLiveEvents(tweet_array);
 	document.querySelector('.liveEvents').innerText = numLive;
-	document.querySelector('.liveEventsPct').innerText = (numLive/tweet_array.length).toFixed(2) + "%";
+	document.querySelector('.liveEventsPct').innerText = (numLive/tweet_array.length*100).toFixed(2) + "%";
 	
 	var numAchieved = getAchievedEvents(tweet_array);
 	document.querySelector('.achievements').innerText = numAchieved;
-	document.querySelector('.achievementsPct').innerText = (numAchieved/tweet_array.length).toFixed(2) + "%";
+	document.querySelector('.achievementsPct').innerText = (numAchieved/tweet_array.length*100).toFixed(2) + "%";
 
 	var numMisc = getMiscEvents(tweet_array);
 	document.querySelector('.miscellaneous').innerText = numMisc;
-	document.querySelector('.miscellaneousPct').innerText = (numMisc/tweet_array.length).toFixed(2) + "%";
+	document.querySelector('.miscellaneousPct').innerText = (numMisc/tweet_array.length*100).toFixed(2) + "%";
 	
 	var numWritten = getWritten(tweet_array);
 	document.querySelector('.written').innerText = numWritten;
-	document.querySelector('.writtenPct').innerText = (numWritten/numCompleted).toFixed(2) + "%";
+	document.querySelector('.writtenPct').innerText = (numWritten/numCompleted*100).toFixed(2) + "%";
+	
+
+	const options = {
+		weekday: "long",
+		month: "long",
+		day: "numeric",
+		year: "numeric"
+
+	}
+	document.getElementById('firstDate').innerText = findEarliestTweet(tweet_array).time.toLocaleDateString("en-US", options);
+
+	document.getElementById('lastDate').innerText = findLatestTweet(tweet_array).time.toLocaleDateString("en-US", options);
+
+}
+
+function findEarliestTweet(tweet_array) {
+	let earliestTweet = tweet_array[0];  
+	for (let i = 1; i < tweet_array.length; i++) {
+		if (earliestTweet.time > tweet_array[i].time) {
+			earliestTweet = tweet_array[i];
+		}
+	}
+
+	return earliestTweet;
+}
+
+function findLatestTweet(tweet_array) {
+	let latestTweet = tweet_array[0];  
+	for (let i = 1; i < tweet_array.length; i++) {
+		if (latestTweet.time < tweet_array[i].time) {
+			latestTweet = tweet_array[i];
+		}
+	}
+	return latestTweet;
 }
 
 function getCompletedEvents(tweet_array) {
