@@ -19,6 +19,9 @@ function parseTweets(runkeeper_tweets) {
 	document.getElementById("secondMost").innerText = objectTopThree["second"];
 	document.getElementById("thirdMost").innerText = objectTopThree["third"];
 
+	document.getElementById("longestActivityType").innerText = findLongestDistanceObject(tweet_array, objectActivities);
+	document.getElementById("shortestActivityType").innerText = findShortestDistanceObject(tweet_array, objectActivities);
+
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
 	activity_vis_spec = {
@@ -34,8 +37,57 @@ function parseTweets(runkeeper_tweets) {
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
 }
+// in one loop, sort and gather different activity types tracking their count and average 
+function findLongestDistanceObject(tweet_array, objectActivities) {
+	// console.log("LONGEST")
+	var longAct = "";
+	var longActAvg = 0;
+	for (let key in objectActivities) {
+		var count = 0;
+		var totalDist = 0;
+		for (let i = 0; i < tweet_array.length; i++) {
+			if (tweet_array[i].activityType == key) {
+				totalDist += tweet_array[i].distance;
+				count += 1;
+			}
+		}
+		// console.log("Key: ", key, "Avg: ", totalDist/count);
+		if (totalDist/count > longActAvg) {
+			longAct = key;
+			longActAvg = totalDist/count;
+		}
+
+	}
+	return longAct;
+}
+
+function findShortestDistanceObject(tweet_array, objectActivities) {
+	// console.log("SHORTEST")
+	var shortAct = "";
+	var shortActAvg = 0;
+	for (let key in objectActivities) {
+		var count = 0;
+		var totalDist = 0;
+		for (let i = 0; i < tweet_array.length; i++) {
+			if (tweet_array[i].activityType == key) {
+				totalDist += tweet_array[i].distance;
+				count += 1;
+			}
+		}
+		// console.log("Key: ", key, "Avg: ", totalDist/count);
+		if (shortAct == "") {
+			shortAct = key;
+			shortActAvg = totalDist/count;
+		}
+		else if (shortActAvg > totalDist/count) {
+			shortAct = key;
+			shortActAvg = totalDist/count;
+		}
 
 
+	}
+	return shortAct;
+}
 
 function getObjectNumAcivities(tweet_array) {
 	var diffObject = {};

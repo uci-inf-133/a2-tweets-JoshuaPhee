@@ -78,7 +78,7 @@ class Tweet {
         const checkMi = this.text.match(regexpMi);
 
         if (checkKm) {
-            return Number(checkKm[1]);
+            return (Number(checkKm[1])) * 0.621371;
         }
         else if (checkMi) {
             return Number(checkMi[1]);
