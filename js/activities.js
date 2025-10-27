@@ -66,40 +66,68 @@ function parseTweets(runkeeper_tweets) {
 
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
+
+	var dictAvgData = createDictAvg(tweet_array, objectTopThree);
+	var distAvgSchema = createSchemaAvg(dictAvgData, objectTopThree)
+
+	activity_dist_vis_avg_spec = {
+	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+	  "description": "A graph of the average distance by day of the week for all of the three most tweeted-about activities.",
+	  "data": {
+	    "values": distAvgSchema
+	  },
+	  //TODO: Add mark and encoding
+	  "width": 200,
+	  "mark": "circle",
+	  "encoding": {
+		"x": {"field": "a", "type": "nominal", "axis": {"title": "Time (day)", "labelAngle": 0}, "sort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]},
+		"y": {"field": "b", "type": "quantitative", "axis": {"title": "Mean of Distance"}},
+		"color": {"field": "activity", "type": "nominal"}
+	  }
+	};
+	vegaEmbed('#distanceVisAggregated', activity_dist_vis_avg_spec, {actions:false});
+
 }
 
-function createDisVisAvgSchema(tweet_array, objectTopThree) {
+function createDictAvg(tweet_array, objectTopThree) {
 	var topThreeArray = [objectTopThree["most"], objectTopThree["second"], objectTopThree["third"]];
-	var disVisSchema = [];
-	// console.log("TOP THREE",topThreeArray);
+	var dictAvgData = {"Sun": {}, "Mon": {}, "Tue": {}, "Wed": {}, "Thu": {}, "Fri": {}, "Sat": {}};
+	var dayWeekObj = {0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat"};
 
 	for (let i = 0; i < tweet_array.length; i++) {
+
 		if (topThreeArray.includes(tweet_array[i].activityType)) {
-			if (tweet_array[i].time.getDay() == 0) {
-				disVisSchema.push({"a": "Sun", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			var dayOfWeek = dayWeekObj[tweet_array[i].time.getDay()];
+			
+			if (dictAvgData[dayOfWeek][tweet_array[i].activityType]) {
+				dictAvgData[dayOfWeek][tweet_array[i].activityType]["count"] += 1; 
+				dictAvgData[dayOfWeek][tweet_array[i].activityType]["distance"] += tweet_array[i].distance;
 			}
-			else if (tweet_array[i].time.getDay() == 1) {
-				disVisSchema.push({"a": "Mon", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
-			}
-			else if (tweet_array[i].time.getDay() == 2) {
-				disVisSchema.push({"a": "Tue", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
-			}
-			else if (tweet_array[i].time.getDay() == 3) {
-				disVisSchema.push({"a": "Wed", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
-			}
-			else if (tweet_array[i].time.getDay() == 4) {
-				disVisSchema.push({"a": "Thu", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
-			}
-			else if (tweet_array[i].time.getDay() == 5) {
-				disVisSchema.push({"a": "Fri", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
-			}
-			else if (tweet_array[i].time.getDay() == 6) {
-				disVisSchema.push({"a": "Sat", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			else {
+				dictAvgData[dayOfWeek][tweet_array[i].activityType] = {"count": 1, "distance": tweet_array[i].distance}
 			}
 		}
 	}
-	// console.log("check schema", disVisSchema);
-	return disVisSchema;
+	// console.log("check avg object", dictAvgData);
+	return dictAvgData;
+}
+
+function createSchemaAvg(dictAvgData, objectTopThree) {
+	// dictAvgData looks like this rn
+	//{"Sun": {"bike": {"count": 2, "distance": 123}, "run": {"count":, "distance":}}, "Mon": {}, "Tue": {}, "Wed": {}, "Thu": {}, "Fri": {}, "Sat": {}}
+	var schemaArray = [];
+	var topThree = [objectTopThree["most"], objectTopThree["second"], objectTopThree["third"]];
+	// now make {"a": "Sun", "b": 5, "activity": "run"}
+	for (let day in dictAvgData) {
+		let activities = dictAvgData[day];
+		for (let activity in activities) {
+			schemaArray.push({"a": day, "b": dictAvgData[day][activity]["distance"]/dictAvgData[day][activity]["count"], "activity": activity});
+		}
+			
+		}
+	
+	// console.log("SCHEMA ARRAY", schemaArray);
+	return schemaArray;
 }
 
 
