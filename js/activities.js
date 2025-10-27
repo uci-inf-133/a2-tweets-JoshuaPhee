@@ -27,22 +27,127 @@ function parseTweets(runkeeper_tweets) {
 	document.getElementById("weekdayOrWeekendLonger").innerText = findLongDay(tweet_array);
 
 
-
-	
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
+	var firstSchema = createArraySchemaOne(activityData);
 
 	activity_vis_spec = {
 	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 	  "description": "A graph of the number of Tweets containing each type of activity.",
 	  "data": {
-	    "values": tweet_array
-	  }
+	    "values": firstSchema
+	  },
 	  //TODO: Add mark and encoding
+	  "mark": "circle",
+	  "encoding": {
+		"x": {"field": "a", "type": "nominal", "axis": {"title": "Activities"}},
+		"y": {"field": "b", "type": "quantitative", "axis": {"title": "Frequency"}}
+	  }
 	};
 	vegaEmbed('#activityVis', activity_vis_spec, {actions:false});
 
+
+	var disVisSchema = createDisVisSchema(tweet_array, objectTopThree);
+	activity_dist_vis_spec = {
+	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+	  "description": "A graph of the distance by day of the week for all of the three most tweeted-about activities.",
+	  "data": {
+	    "values": disVisSchema
+	  },
+	  //TODO: Add mark and encoding
+	  "width": 200,
+	  "mark": "circle",
+	  "encoding": {
+		"x": {"field": "a", "type": "nominal", "axis": {"title": "Time (day)", "labelAngle": 0}, "sort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]},
+		"y": {"field": "b", "type": "quantitative", "axis": {"title": "Distance"}},
+		"color": {"field": "activity", "type": "nominal"}
+	  }
+	};
+	vegaEmbed('#distanceVis', activity_dist_vis_spec, {actions:false});
+
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
+}
+
+function createDisVisAvgSchema(tweet_array, objectTopThree) {
+	var topThreeArray = [objectTopThree["most"], objectTopThree["second"], objectTopThree["third"]];
+	var disVisSchema = [];
+	// console.log("TOP THREE",topThreeArray);
+
+	for (let i = 0; i < tweet_array.length; i++) {
+		if (topThreeArray.includes(tweet_array[i].activityType)) {
+			if (tweet_array[i].time.getDay() == 0) {
+				disVisSchema.push({"a": "Sun", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 1) {
+				disVisSchema.push({"a": "Mon", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 2) {
+				disVisSchema.push({"a": "Tue", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 3) {
+				disVisSchema.push({"a": "Wed", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 4) {
+				disVisSchema.push({"a": "Thu", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 5) {
+				disVisSchema.push({"a": "Fri", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 6) {
+				disVisSchema.push({"a": "Sat", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+		}
+	}
+	// console.log("check schema", disVisSchema);
+	return disVisSchema;
+}
+
+
+// {"a": "sun", "b": 12}
+function createDisVisSchema(tweet_array, objectTopThree) {
+	var topThreeArray = [objectTopThree["most"], objectTopThree["second"], objectTopThree["third"]];
+	var disVisSchema = [];
+	// console.log("TOP THREE",topThreeArray);
+
+	for (let i = 0; i < tweet_array.length; i++) {
+		if (topThreeArray.includes(tweet_array[i].activityType)) {
+			if (tweet_array[i].time.getDay() == 0) {
+				disVisSchema.push({"a": "Sun", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 1) {
+				disVisSchema.push({"a": "Mon", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 2) {
+				disVisSchema.push({"a": "Tue", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 3) {
+				disVisSchema.push({"a": "Wed", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 4) {
+				disVisSchema.push({"a": "Thu", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 5) {
+				disVisSchema.push({"a": "Fri", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+			else if (tweet_array[i].time.getDay() == 6) {
+				disVisSchema.push({"a": "Sat", "b": tweet_array[i].distance, "activity": tweet_array[i].activityType});
+			}
+		}
+	}
+	// console.log("check schema", disVisSchema);
+	return disVisSchema;
+}
+
+
+// array.push({"a": "run", "b": 4})
+function createArraySchemaOne (activityData) {
+	// activtyData contains data like {"run": {"count": 4, "distance": 1241}, "walk": {"count": 1, "distance": 4}}
+	var newValues = [];
+	for (let key in activityData) {
+		newValues.push({"a": key, "b": activityData[key]["count"]})
+	}
+	// console.log(newValues);
+	return newValues;
 }
 
 
@@ -62,7 +167,7 @@ function parseActivityTypes (tweet_array) {
 			}
 		}
 	}
-	console.log(activityData);
+	// console.log(activityData);
 	return activityData;
 }
 
