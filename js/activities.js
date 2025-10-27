@@ -87,6 +87,27 @@ function parseTweets(runkeeper_tweets) {
 	};
 	vegaEmbed('#distanceVisAggregated', activity_dist_vis_avg_spec, {actions:false});
 
+	document.getElementById("distanceVis").style.display = "none";
+	document.getElementById("distanceVisAggregated").style.display = "none";
+
+	document.getElementById("aggregate").addEventListener("click", function() {
+		if (document.getElementById("aggregate").innerText == "Show means") {
+			document.getElementById("aggregate").innerText = "Show all activities";
+			// display mean graph now
+			document.getElementById("distanceVis").style.display = "none";
+			document.getElementById("distanceVisAggregated").style.display = "block";
+
+
+
+		}
+		else {
+			document.getElementById("aggregate").innerText = "Show means";
+			// display distance graph now
+			document.getElementById("distanceVisAggregated").style.display = "none";
+			document.getElementById("distanceVis").style.display = "block";
+		}
+	});
+
 }
 
 function createDictAvg(tweet_array, objectTopThree) {
@@ -299,4 +320,5 @@ function findShortestDistanceAct(activityData) {
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
 	loadSavedRunkeeperTweets().then(parseTweets);
+
 });
