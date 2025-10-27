@@ -27,6 +27,8 @@ function parseTweets(runkeeper_tweets) {
 	document.getElementById("weekdayOrWeekendLonger").innerText = findLongDay(tweet_array);
 
 
+
+	
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
 	activity_vis_spec = {
@@ -42,6 +44,8 @@ function parseTweets(runkeeper_tweets) {
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
 }
+
+
 // in one loop, sort and gather different activity types tracking their count and average 
 
 function parseActivityTypes (tweet_array) {
