@@ -9,20 +9,24 @@ function parseTweets(runkeeper_tweets) {
 		return new Tweet(tweet.text, tweet.created_at);
 	});
 
+	// Num Different Type Activities
+	var activityData = parseActivityTypes(tweet_array);
+	document.getElementById("numberActivities").innerText = Object.keys(activityData).length;
 
-	var objectActivities = getObjectNumAcivities(tweet_array);
-	document.getElementById("numberActivities").innerText = Object.keys(objectActivities).length;
-
-	var objectTopThree = getObjectTopThree(objectActivities);
-
+	//Top Three Common Activities
+	var objectTopThree = getThreeCommonAct(activityData);
 	document.getElementById("firstMost").innerText = objectTopThree["most"];
 	document.getElementById("secondMost").innerText = objectTopThree["second"];
 	document.getElementById("thirdMost").innerText = objectTopThree["third"];
 
-	document.getElementById("longestActivityType").innerText = findLongestDistanceObject(tweet_array, objectActivities);
-	document.getElementById("shortestActivityType").innerText = findShortestDistanceObject(tweet_array, objectActivities);
+	//Longest Shortest Activity Types
+	document.getElementById("longestActivityType").innerText = findLongestDistanceAct(activityData);
+	document.getElementById("shortestActivityType").innerText = findShortestDistanceAct(activityData)
 
+	//Weekday or Weekend
 	document.getElementById("weekdayOrWeekendLonger").innerText = findLongDay(tweet_array);
+
+
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
 	activity_vis_spec = {
@@ -39,6 +43,62 @@ function parseTweets(runkeeper_tweets) {
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
 }
 // in one loop, sort and gather different activity types tracking their count and average 
+
+function parseActivityTypes (tweet_array) {
+	var activityData = {}; // {"run": {"count": , "distance": }}
+	for (let i = 0; i < tweet_array.length; i++) {
+		if (tweet_array[i].activityType != "unknown") {
+			var tweetActivityType = tweet_array[i].activityType;
+			if (activityData[tweetActivityType]) {
+				activityData[tweetActivityType]["count"] += 1;
+				activityData[tweetActivityType]["distance"] += tweet_array[i].distance;
+			}
+			else {
+				activityData[tweetActivityType] = {"count": 1, "distance": tweet_array[i].distance};
+			}
+		}
+	}
+	console.log(activityData);
+	return activityData;
+}
+
+function getThreeCommonAct (activityData) {
+	var mostPopularValue = 0;
+	var mostPopularKey = "";
+
+	var secondPopularValue = 0;
+	var secondPopularKey = "";
+
+	var thirdPopularValue = 0;
+	var thirdPopularKey = "";
+	for (let key in activityData) {
+		if (activityData[key]["count"] >= mostPopularValue) {
+			thirdPopularValue = secondPopularValue;
+			thirdPopularKey = secondPopularKey;
+
+			secondPopularKey = mostPopularKey;
+			secondPopularValue = mostPopularValue;
+
+			mostPopularKey = key;
+			mostPopularValue = activityData[key]["count"];
+		}
+		else if (activityData[key]["count"] >= secondPopularValue) {
+			thirdPopularKey = secondPopularKey;
+			thirdPopularValue = secondPopularValue;
+
+			secondPopularKey = key;
+			secondPopularValue = activityData[key]["count"];
+		}
+		else if (activityData[key]["count"] > thirdPopularValue) {
+			thirdPopularKey = key;
+			thirdPopularValue = activityData[key]["count"];
+		}
+	}
+	var objectTopThree = {"most": mostPopularKey, "second": secondPopularKey, "third": thirdPopularKey};
+	return objectTopThree;
+}
+
+// Finds if weekends or weekdays have longest avg activity types
 function findLongDay(tweet_array) {
 	var weekdayCount = 0;
 	var weekdayTotalDis = 0;
@@ -65,43 +125,27 @@ function findLongDay(tweet_array) {
 	}
 }
 
-function findLongestDistanceObject(tweet_array, objectActivities) {
-	// console.log("LONGEST")
+function findLongestDistanceAct(activityData) {
 	var longAct = "";
 	var longActAvg = 0;
-	for (let key in objectActivities) {
-		var count = 0;
-		var totalDist = 0;
-		for (let i = 0; i < tweet_array.length; i++) {
-			if (tweet_array[i].activityType == key) {
-				totalDist += tweet_array[i].distance;
-				count += 1;
-			}
-		}
-		// console.log("Key: ", key, "Avg: ", totalDist/count);
-		if (totalDist/count > longActAvg) {
+	for (let key in activityData) {
+		var currentDist = activityData[key]["distance"];
+		var currentCount = activityData[key]["count"];
+		if (currentDist / currentCount > longActAvg) {
 			longAct = key;
-			longActAvg = totalDist/count;
+			longActAvg = currentDist/currentCount;
 		}
 
 	}
 	return longAct;
 }
 
-function findShortestDistanceObject(tweet_array, objectActivities) {
-	// console.log("SHORTEST")
+function findShortestDistanceAct(activityData) {
 	var shortAct = "";
 	var shortActAvg = 0;
-	for (let key in objectActivities) {
-		var count = 0;
-		var totalDist = 0;
-		for (let i = 0; i < tweet_array.length; i++) {
-			if (tweet_array[i].activityType == key) {
-				totalDist += tweet_array[i].distance;
-				count += 1;
-			}
-		}
-		// console.log("Key: ", key, "Avg: ", totalDist/count);
+	for (let key in activityData) {
+		var count = activityData[key]["count"];
+		var totalDist = activityData[key]["distance"];
 		if (shortAct == "") {
 			shortAct = key;
 			shortActAvg = totalDist/count;
@@ -110,66 +154,10 @@ function findShortestDistanceObject(tweet_array, objectActivities) {
 			shortAct = key;
 			shortActAvg = totalDist/count;
 		}
-
-
 	}
 	return shortAct;
 }
 
-function getObjectNumAcivities(tweet_array) {
-	var diffObject = {};
-
-	for (let i = 0; i < tweet_array.length;i++) {
-		const tweetActivityType = tweet_array[i].activityType;
-		if (tweetActivityType != "unknown") {
-			if (diffObject[tweetActivityType]){
-				diffObject[tweetActivityType]++;
-			}
-			else {
-				diffObject[tweetActivityType] = 1;
-			}
-		}
-	}
-	return diffObject
-}
-
-function getObjectTopThree(diffObject) {
-	
-	var mostPopularValue = 0;
-	var mostPopularKey = "";
-
-	var secondPopularValue = 0;
-	var secondPopularKey = "";
-
-	var thirdPopularValue = 0;
-	var thirdPopularKey = "";
-
-	for (let key in diffObject) {
-		if (diffObject[key] >= mostPopularValue) {
-			thirdPopularValue = secondPopularValue;
-			thirdPopularKey = secondPopularKey;
-
-			secondPopularKey = mostPopularKey;
-			secondPopularValue = mostPopularValue;
-
-			mostPopularKey = key;
-			mostPopularValue = diffObject[key];
-		}
-		else if (diffObject[key] >= secondPopularValue) {
-			thirdPopularKey = secondPopularKey;
-			thirdPopularValue = secondPopularValue;
-
-			secondPopularKey = key;
-			secondPopularValue = diffObject[key];
-		}
-		else if (diffObject[key] > thirdPopularValue) {
-			thirdPopularKey = key;
-			thirdPopularValue = diffObject[key];
-		}
-	}
-	var objectTopThree = {"most": mostPopularKey, "second": secondPopularKey, "third": thirdPopularKey};
-	return objectTopThree;
-}
 
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
