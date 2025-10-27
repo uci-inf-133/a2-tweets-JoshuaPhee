@@ -9,6 +9,16 @@ function parseTweets(runkeeper_tweets) {
 		return new Tweet(tweet.text, tweet.created_at);
 	});
 
+
+	var objectActivities = getObjectNumAcivities(tweet_array);
+	document.getElementById("numberActivities").innerText = Object.keys(objectActivities).length;
+
+	var objectTopThree = getObjectTopThree(objectActivities);
+
+	document.getElementById("firstMost").innerText = objectTopThree["most"];
+	document.getElementById("secondMost").innerText = objectTopThree["second"];
+	document.getElementById("thirdMost").innerText = objectTopThree["third"];
+
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
 	activity_vis_spec = {
@@ -23,6 +33,63 @@ function parseTweets(runkeeper_tweets) {
 
 	//TODO: create the visualizations which group the three most-tweeted activities by the day of the week.
 	//Use those visualizations to answer the questions about which activities tended to be longest and when.
+}
+
+
+
+function getObjectNumAcivities(tweet_array) {
+	var diffObject = {};
+
+	for (let i = 0; i < tweet_array.length;i++) {
+		const tweetActivityType = tweet_array[i].activityType;
+		if (tweetActivityType != "unknown") {
+			if (diffObject[tweetActivityType]){
+				diffObject[tweetActivityType]++;
+			}
+			else {
+				diffObject[tweetActivityType] = 1;
+			}
+		}
+	}
+	return diffObject
+}
+
+function getObjectTopThree(diffObject) {
+	
+	var mostPopularValue = 0;
+	var mostPopularKey = "";
+
+	var secondPopularValue = 0;
+	var secondPopularKey = "";
+
+	var thirdPopularValue = 0;
+	var thirdPopularKey = "";
+
+	for (let key in diffObject) {
+		if (diffObject[key] >= mostPopularValue) {
+			thirdPopularValue = secondPopularValue;
+			thirdPopularKey = secondPopularKey;
+
+			secondPopularKey = mostPopularKey;
+			secondPopularValue = mostPopularValue;
+
+			mostPopularKey = key;
+			mostPopularValue = diffObject[key];
+		}
+		else if (diffObject[key] >= secondPopularValue) {
+			thirdPopularKey = secondPopularKey;
+			thirdPopularValue = secondPopularValue;
+
+			secondPopularKey = key;
+			secondPopularValue = diffObject[key];
+		}
+		else if (diffObject[key] > thirdPopularValue) {
+			thirdPopularKey = key;
+			thirdPopularValue = diffObject[key];
+		}
+	}
+	var objectTopThree = {"most": mostPopularKey, "second": secondPopularKey, "third": thirdPopularKey};
+	return objectTopThree;
 }
 
 //Wait for the DOM to load

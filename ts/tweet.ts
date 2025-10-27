@@ -55,16 +55,40 @@ class Tweet {
         // note for next time - use regex to find "mi" or "km" and look at the word that follows it. Return that string
         // note for next step - in 
 
-        return "";
+        const regexpKm = /km\s+(\w+)/;
+        const regexpMi = /mi\s+(\w+)/;
+        const checkKm = this.text.match(regexpKm);
+        const checkMi = this.text.match(regexpMi);
+        if (checkKm) {
+            return checkKm[1];
+        }
+        else if (checkMi) {
+            return checkMi[1];
+        }
+        return "unknown";
     }
 
     get distance():number {
         if(this.source != 'completed_event') {
             return 0;
         }
+        const regexpKm = /([\d.]+)\s+km/;
+        const regexpMi = /([\d.]+)\s+mi/;
+        const checkKm = this.text.match(regexpKm);
+        const checkMi = this.text.match(regexpMi);
+
+        if (checkKm) {
+            return Number(checkKm[1]);
+        }
+        else if (checkMi) {
+            return Number(checkMi[1]);
+        }
+
+        
         //TODO: prase the distance from the text of the tweet
         return 0;
     }
+
 
     getHTMLTableRow(rowNumber:number):string {
         //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
