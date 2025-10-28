@@ -48,7 +48,7 @@ function addEventHandlerForSearch(writtenArray) {
 						var rowText = document.createElement("td");
 						let tweetText = writtenArray[i].text;
 						tweetText = tweetText.replace(urlregex, (url) => {
-							return `<a href="${url}" ${url}</a>`
+							return `<a href="${url}">${url}</a>`
 						})
 
 						rowText.innerHTML = tweetText;
