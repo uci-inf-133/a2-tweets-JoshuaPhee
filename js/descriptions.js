@@ -69,12 +69,6 @@ function addEventHandlerForSearch(writtenArray) {
 	
 }
 
-function checkNumTweets(text) {
-	var count = 0;
-
-	return count;
-}
-
 //Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function (event) {
 	document.getElementById("searchCount").innerText = 0;
